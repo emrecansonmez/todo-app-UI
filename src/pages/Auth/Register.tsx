@@ -1,47 +1,60 @@
-import React from "react";
-import { Row, Col, Form, Input, Button, theme } from "antd";
+import React, { useState } from "react";
+import { Row, Col, Form, Input, Button, theme, Grid } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import AuthService from "../../services/auth-service";
 const { useToken } = theme;
+const { useBreakpoint } = Grid;
 
 export const Register: React.FC = () => {
   const { token } = useToken();
+  const navigate = useNavigate();
+  const screens = useBreakpoint();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onFinish = (values: any) => {
-    console.log("Success:", values);
+    AuthService.register(values.username, values.email, values.password)
+      .then(() => {
+        navigate("/login");
+      })
+      .catch((error: any) => {
+        console.error("Registration error:", error);
+        setErrorMessage("Registration failed. Please try again.");
+      });
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
+    console.error("Failed:", errorInfo);
   };
 
   return (
     <Row style={{ height: "98vh" }}>
-      <Col
-        span={12}
-        style={{
-          backgroundColor: "#111111",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: token.sizeLG,
-        }}
-      >
-        <div
+      {screens.md && (
+        <Col
+          md={12}
           style={{
-            color: token.colorTextLightSolid,
-            textAlign: "center",
-            marginBottom: token.sizeLG,
+            backgroundColor: "#111111",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: token.sizeLG,
           }}
         >
-          <div>
+          <div
+            style={{
+              color: token.colorTextLightSolid,
+              textAlign: "center",
+              marginBottom: token.sizeLG,
+            }}
+          >
             <img
               src={require("../../assets/todo.png")}
               alt="Organic Mind"
               style={{ width: "100%" }}
             />
           </div>
-        </div>
-      </Col>
+        </Col>
+      )}
 
       <Col
         span={12}
@@ -65,20 +78,22 @@ export const Register: React.FC = () => {
             Sign up
           </h2>
           <Form
-            name="basic"
+            name="registerForm"
             initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             layout="vertical"
           >
             <Form.Item
-              label="Name"
-              name="name"
-              rules={[{ required: true, message: "Please enter your name!" }]}
+              label="Username"
+              name="username"
+              rules={[
+                { required: true, message: "Please enter your username!" },
+              ]}
               style={{ marginBottom: token.sizeMD }}
             >
               <Input
-                placeholder="John Doe"
+                placeholder="Enter your username"
                 style={{
                   backgroundColor: token.colorFillAlter,
                   borderColor: token.colorBorder,
@@ -90,11 +105,14 @@ export const Register: React.FC = () => {
             <Form.Item
               label="Email"
               name="email"
-              rules={[{ required: true, message: "Please enter your email!" }]}
+              rules={[
+                { required: true, message: "Please enter your email!" },
+                { type: "email", message: "Please enter a valid email!" },
+              ]}
               style={{ marginBottom: token.sizeMD }}
             >
               <Input
-                placeholder="email.email@mail.com"
+                placeholder="email@example.com"
                 style={{
                   backgroundColor: token.colorFillAlter,
                   borderColor: token.colorBorder,
@@ -107,12 +125,16 @@ export const Register: React.FC = () => {
               label="Password"
               name="password"
               rules={[
-                { required: true, message: "Please input your password!" },
+                { required: true, message: "Please enter your password!" },
+                {
+                  min: 6,
+                  message: "Password must be at least 6 characters long!",
+                },
               ]}
               style={{ marginBottom: token.sizeMD }}
             >
               <Input.Password
-                placeholder="********"
+                placeholder="Enter your password"
                 iconRender={(visible) =>
                   visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                 }
@@ -123,6 +145,12 @@ export const Register: React.FC = () => {
                 }}
               />
             </Form.Item>
+
+            {errorMessage && (
+              <Form.Item>
+                <p style={{ color: "red" }}>{errorMessage}</p>
+              </Form.Item>
+            )}
 
             <Form.Item>
               <Button

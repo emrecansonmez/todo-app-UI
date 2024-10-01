@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu, Button, Grid, theme } from "antd";
 import {
   MenuUnfoldOutlined,
@@ -6,7 +6,7 @@ import {
   CheckSquareOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 const { useToken } = theme;
 const { Header, Sider, Content } = Layout;
@@ -17,10 +17,10 @@ export const DashboardLayout: React.FC = () => {
   const { token } = useToken();
   const screens = useBreakpoint();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname.split("/").pop();
   const pageTitles: { [key: string]: string } = {
     taskManager: "Task Manager",
-    stickyWall: "Sticky Wall",
   };
   const pageTitle = pageTitles[currentPath || ""] || currentPath;
 
@@ -28,11 +28,21 @@ export const DashboardLayout: React.FC = () => {
     setCollapsed(!collapsed);
   };
 
-  const handleSignOut = () => {};
+  const handleSignOut = () => {
+    sessionStorage.removeItem("accessToken");
+
+    navigate("/login");
+  };
+  useEffect(() => {
+    if (!screens.md) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
+  }, [screens]);
 
   return (
-    <Layout style={{ backgroundColor: token.colorBgBase }}>
-      {/* Sidebar */}
+    <Layout style={{ backgroundColor: token.colorBgBase, minWidth: "520px" }}>
       <Sider
         collapsible
         collapsed={collapsed}
@@ -47,6 +57,7 @@ export const DashboardLayout: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           height: "95vh",
+          minHeight: "95vh",
           alignItems: "space-between",
         }}
       >
@@ -87,17 +98,28 @@ export const DashboardLayout: React.FC = () => {
             {
               key: "1",
               icon: <CheckSquareOutlined />,
-              label: <>Task Manager</>,
+              label: (
+                <span
+                  onClick={() => {
+                    navigate("/dashboard/taskManager");
+                  }}
+                  style={{ color: token.colorTextBase, fontWeight: "bold" }}
+                >
+                  Task Manager
+                </span>
+              ),
             },
-            {
-              key: "2",
-              icon: <CheckSquareOutlined />,
-              label: <>Sticky Wall</>,
-            },
+
             {
               key: "3",
               icon: <LogoutOutlined />,
-              label: <>Signout</>,
+              label: (
+                <span
+                  style={{ color: token.colorTextBase, fontWeight: "bold" }}
+                >
+                  Signout
+                </span>
+              ),
               style: {
                 position: "absolute",
                 bottom: 0,

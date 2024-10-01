@@ -1,235 +1,129 @@
-import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Space, Select } from "antd";
-import {
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import useDebounce from "../../hooks/useDebounce"; // Debounce hook'u
+// TaskManager.tsx
+import React, { useState } from "react";
+import { TaskSearch } from "../../components/TaskSearch";
+import { TaskTable } from "../../components/TaskTable";
+import taskService from "../../services/task-service";
+import { ConfirmDeleteModal } from "../../components/modals/ConfirmDeleteModal";
 import { CreateTaskModal } from "../../components/modals/CreateTaskModal";
 import { UpdateTaskModal } from "../../components/modals/UpdateTaskModal";
-import { ConfirmDeleteModal } from "../../components/modals/ConfirmDeleteModal";
-
-interface Task {
-  key: number;
-  title: string;
-  description: string;
-  priority: string;
-}
+import { ViewTaskModal } from "../../components/modals/ViewTaskModal";
+import useDebounce from "../../hooks/useDebounce";
+import { Task } from "../../types";
 
 export const TaskManager: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [searchText, setSearchText] = useState<string>("");
-  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<
-    string | null
-  >(null);
+  const [sortBy, setSortBy] = useState<string | undefined>();
+  const [direction, setDirection] = useState<string | undefined>();
+  const [priorityFilter, setPriorityFilter] = useState<string | undefined>();
+  const [stateFilter, setStateFilter] = useState<string | undefined>();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTaskToDelete, setSelectedTaskToDelete] = useState<
     number | null
   >(null);
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const debouncedSearchText = useDebounce(searchText, 500);
 
-  useEffect(() => {
-    setTasks([
-      {
-        key: 1,
-        title: "Task 1",
-        description: "Description for Task 1",
-        priority: "High",
-      },
-      {
-        key: 2,
-        title: "Task 2",
-        description: "Description for Task 2",
-        priority: "Low",
-      },
-      {
-        key: 3,
-        title: "Task 3",
-        description: "Description for Task 3",
-        priority: "Medium",
-      },
-    ]);
-  }, []);
-
-  const filteredTasks = tasks.filter((task) => {
-    return (
-      task.title.toLowerCase().includes(debouncedSearchText.toLowerCase()) &&
-      (selectedPriorityFilter && selectedPriorityFilter !== "all"
-        ? task.priority === selectedPriorityFilter
-        : true)
-    );
+  const { tasks, pagination, mutate } = taskService.useTasks({
+    name: debouncedSearchText || undefined,
+    priority: priorityFilter,
+    state: stateFilter,
+    sortBy,
+    direction,
+    pageable: { pageNumber: currentPage - 1, pageSize: 20 },
   });
-
-  const priorityOptions = [
-    { value: "all", label: "All", color: "gray" },
-    { value: "High", label: "High", color: "red" },
-    { value: "Medium", label: "Medium", color: "orange" },
-    { value: "Low", label: "Low", color: "blue" },
-    { value: "Very Low", label: "Very Low", color: "green" },
-  ];
-
-  const showCreateTaskModal = () => setIsCreateModalOpen(true);
+  const showViewTaskModal = (task: Task) => {
+    setViewingTask(task);
+    setIsViewModalOpen(true);
+  };
   const showUpdateTaskModal = (task: Task) => {
     setEditingTask(task);
     setIsUpdateModalOpen(true);
   };
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    if (sorter.order) {
+      setSortBy(sorter.field);
+      setDirection(sorter.order === "ascend" ? "asc" : "desc");
+    } else {
+      setSortBy(undefined);
+      setDirection(undefined);
+    }
 
-  const handleCancelCreateTaskModal = () => setIsCreateModalOpen(false);
-  const handleCancelUpdateTaskModal = () => {
-    setIsUpdateModalOpen(false);
-    setEditingTask(null);
+    const priorityFilter =
+      filters.priority?.[0] !== "all" ? filters.priority?.[0] : undefined;
+    const stateFilter =
+      filters.state?.[0] !== "all" ? filters.state?.[0] : undefined;
+
+    setPriorityFilter(priorityFilter);
+    setStateFilter(stateFilter);
+    setCurrentPage(pagination.current);
   };
-
-  const handleDelete = (key: number) => {
-    setTasks(tasks.filter((task) => task.key !== key));
-    setSelectedTaskToDelete(null);
-    setIsDeleteModalOpen(false);
-  };
-
-  const handleAddTask = (values: {
-    title: string;
-    description: string;
-    priority: string;
-  }) => {
-    const newTask: Task = {
-      key: tasks.length + 1,
-      title: values.title,
-      description: values.description,
-      priority: values.priority,
-    };
-    setTasks([...tasks, newTask]);
-    setIsCreateModalOpen(false);
-  };
-
-  const handleUpdateTask = (values: {
-    title: string;
-    description: string;
-    priority: string;
-  }) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.key === editingTask?.key ? { ...task, ...values } : task
-      )
-    );
-    setIsUpdateModalOpen(false);
-    setEditingTask(null);
-  };
-
-  const columns = [
-    {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
-      sorter: (a: Task, b: Task) => a.title.localeCompare(b.title),
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Priority",
-      dataIndex: "priority",
-      key: "priority",
-      render: (priority: string) => {
-        const option = priorityOptions.find((opt) => opt.value === priority);
-        return (
-          <span style={{ color: option?.color || "black" }}>● {priority}</span>
-        );
-      },
-      filters: priorityOptions.map((opt) => ({
-        text: opt.label,
-        value: opt.value,
-      })),
-      onFilter: (value: any, record: Task) =>
-        value === "all" ? true : record.priority === value,
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (text: string, record: Task) => (
-        <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => showUpdateTaskModal(record)}
-          >
-            Update
-          </Button>
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => {
-              setSelectedTaskToDelete(record.key);
-              setIsDeleteModalOpen(true);
-            }}
-          >
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ];
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="Search tasks..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <Select
-          placeholder="Filter by priority"
-          allowClear
-          onChange={(value) => setSelectedPriorityFilter(value)}
-        >
-          {priorityOptions.map((option) => (
-            <Select.Option key={option.value} value={option.value}>
-              <span style={{ color: option.color }}>●</span> {option.label}
-            </Select.Option>
-          ))}
-        </Select>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={showCreateTaskModal}
-        >
-          Add Task
-        </Button>
-      </Space>
+      <TaskSearch
+        searchText={searchText}
+        onSearchChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setSearchText(e.target.value)
+        }
+        onAddTaskClick={() => setIsCreateModalOpen(true)}
+      />
 
-      <Table
-        columns={columns}
-        dataSource={filteredTasks}
-        rowKey="key"
-        pagination={{ pageSize: 5 }}
-        bordered
+      <TaskTable
+        tasks={tasks}
+        pagination={pagination}
+        onTableChange={handleTableChange}
+        onView={showViewTaskModal}
+        onEdit={showUpdateTaskModal}
+        onDelete={(taskId) => {
+          setSelectedTaskToDelete(taskId);
+          setIsDeleteModalOpen(true);
+        }}
       />
 
       <CreateTaskModal
         visible={isCreateModalOpen}
-        onCancel={handleCancelCreateTaskModal}
-        onSubmit={handleAddTask}
+        onCancel={() => setIsCreateModalOpen(false)}
+        onSubmit={async (values) => {
+          await taskService.createTask(values);
+          mutate();
+          setIsCreateModalOpen(false);
+        }}
       />
 
       <UpdateTaskModal
         visible={isUpdateModalOpen}
-        onCancel={handleCancelUpdateTaskModal}
-        onSubmit={handleUpdateTask}
+        onCancel={() => setIsUpdateModalOpen(false)}
+        onSubmit={async (values) => {
+          if (editingTask) {
+            await taskService.updateTask(editingTask.taskId, values);
+            mutate();
+            setIsUpdateModalOpen(false);
+          }
+        }}
         editingTask={editingTask}
       />
 
       <ConfirmDeleteModal
         visible={isDeleteModalOpen}
-        onConfirm={() => handleDelete(selectedTaskToDelete!)}
+        onConfirm={async () => {
+          if (selectedTaskToDelete) {
+            await taskService.deleteTask(selectedTaskToDelete);
+            mutate();
+            setIsDeleteModalOpen(false);
+          }
+        }}
         onCancel={() => setIsDeleteModalOpen(false)}
+      />
+
+      <ViewTaskModal
+        visible={isViewModalOpen}
+        onCancel={() => setIsViewModalOpen(false)}
+        viewingTask={viewingTask}
       />
     </div>
   );
