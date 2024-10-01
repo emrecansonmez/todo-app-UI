@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import useSWR from "swr";
 import { PageResponse, Task } from "../types";
 
-const API_URL = process.env.REACT_APP_API_URL + "/tasks/";
+const API_URL = process.env.REACT_APP_API_URL + "/tasks";
 
 type CreateTaskInput = Omit<Task, "taskId" | "user">;
 
@@ -38,7 +38,7 @@ const useTasks = (filterParams?: {
   direction?: string;
   pageable?: { pageNumber: number; pageSize: number };
 }) => {
-  let url = `${API_URL}allTasks`;
+  let url = `${API_URL}`;
 
   const queryParams = new URLSearchParams();
 
@@ -78,19 +78,19 @@ const useTasks = (filterParams?: {
 };
 
 const createTask = async (task: CreateTaskInput): Promise<Task> => {
-  const response = await axiosInstance.post<Task>("/create", task);
+  const response = await axiosInstance.post<Task>("", task);
 
   return response.data;
 };
 
 const updateTask = async (id: number, task: Partial<Task>): Promise<Task> => {
-  const response = await axiosInstance.put<Task>(`/update/${id}`, task);
+  const response = await axiosInstance.put<Task>(`/${id}`, task);
 
   return response.data;
 };
 
 const deleteTask = async (id: number): Promise<void> => {
-  await axiosInstance.delete(`/delete/${id}`);
+  await axiosInstance.delete(`/${id}`);
 };
 
 const taskService = {
