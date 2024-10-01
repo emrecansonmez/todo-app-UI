@@ -1,46 +1,116 @@
-# Getting Started with Create React App
+# THY Todo App Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Overview
 
-## Available Scripts
+THY Todo App frontend is built using **React** and **TypeScript**, and it integrates with a backend server for task management via REST API calls. The application allows users to sign in, manage tasks (CRUD operations), and filter tasks based on their priority and state. The backend API URL is configurable via environment variables.
 
-In the project directory, you can run:
+## Technologies Used
 
-### `npm start`
+- **React**: A JavaScript library for building user interfaces.
+- **TypeScript**: A statically typed superset of JavaScript.
+- **Ant Design (AntD)**: A React UI library used for building responsive and user-friendly interfaces.
+- **Axios**: A promise-based HTTP client for making API requests.
+- **SWR**: A React hook library for data fetching with caching and revalidation support.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Project Structure
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The project is structured as follows:
 
-### `npm test`
+```bash
+src/
+│
+├── assets/               # Image assets used in the application
+│   └── toDo.jpeg
+│   └── todo.png
+│
+├── components/           # Reusable React components
+│   ├── modals/
+│   │   └── TaskSearch.tsx
+│   │   └── TaskTable.tsx
+│
+├── constants/            # App constants, such as options for task priorities
+│   └── options.ts
+│
+├── hooks/                # Custom React hooks
+│   └── useDebounce.ts
+│
+├── modules/              # Specific page-level modules
+│   └── Dashboard/
+│       └── index.tsx     # Dashboard page for managing tasks
+│
+├── pages/                # Authentication and TaskManager pages
+│   ├── Auth/
+│   │   └── Login.tsx
+│   │   └── Register.tsx
+│   └── TaskManager/
+│       └── index.tsx     # TaskManager page that lists tasks
+│
+├── services/             # API services for authentication and tasks
+│   └── auth-service.ts
+│   └── task-service.ts
+│
+├── styles/               # Theme and styling related files
+│   └── theme.ts
+│
+├── types/                # TypeScript types used across the application
+│   └── index.ts
+│
+├── App.tsx               # Main App component
+├── index.tsx             # Entry point of the React application
+├── ProtectedRoutes.tsx   # Component to protect routes based on authentication
+└── Router.tsx            # Router configuration for the application
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## API Configuration
 
-### `npm run build`
+The application makes API requests to the backend using **Axios** and **SWR** for data fetching. The backend API URL is configurable via an `.env` file, where you can specify the base URL for the API.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **.env** example:
+  ```env
+  REACT_APP_API_URL=https://your-backend-api.com
+  ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+All backend requests will use this base URL, allowing easy switching between development, staging, and production environments.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project Setup
 
-### `npm run eject`
+### 1. Clone the Repository
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```bash
+git clone https://github.com/emrecansonmez/thy-todoapp-ui.git
+cd thy-todoapp-ui
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Install Dependencies
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Install all the necessary dependencies using npm or yarn:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```bash
+npm install
+# or
+yarn install
+```
 
-## Learn More
+### 3. Configure the Environment Variables
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Create a `.env` file in the root directory and configure the backend API URL:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+REACT_APP_API_URL=http://localhost:8080
+```
+
+### 4. Start the Development Server
+
+To start the React development server, run:
+
+```bash
+npm start
+# or
+yarn start
+```
+
+The application will be available at **http://localhost:3000**.
+
+---
+
+Feel free to explore and modify the project as per your requirements!
