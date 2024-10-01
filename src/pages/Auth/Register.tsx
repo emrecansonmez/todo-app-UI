@@ -33,7 +33,7 @@ export const Register: React.FC = () => {
         <Col
           md={12}
           style={{
-            backgroundColor: "#111111",
+            backgroundColor: "#252221",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -48,7 +48,7 @@ export const Register: React.FC = () => {
             }}
           >
             <img
-              src={require("../../assets/todo.png")}
+              src={require("../../assets/thy-todo.webp")}
               alt="Organic Mind"
               style={{ width: "100%" }}
             />
