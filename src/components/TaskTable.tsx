@@ -139,8 +139,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
       }}
       onChange={onTableChange}
       bordered
-      scroll={{ y: 520 }}
-      style={{ minWidth: 400 }}
+      scroll={{ y: "60vh", x: 200 }}
+      style={{ maxHeight: "60vh", minWidth: 300 }}
     />
   );
 };

@@ -1,4 +1,3 @@
-// TaskManager.tsx
 import React, { useState } from "react";
 import { TaskSearch } from "../../components/TaskSearch";
 import { TaskTable } from "../../components/TaskTable";
@@ -64,7 +63,7 @@ export const TaskManager: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       <TaskSearch
         searchText={searchText}
         onSearchChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -125,6 +124,6 @@ export const TaskManager: React.FC = () => {
         onCancel={() => setIsViewModalOpen(false)}
         viewingTask={viewingTask}
       />
-    </div>
+    </>
   );
 };

@@ -19,6 +19,7 @@ export const TaskSearch: React.FC<TaskSearchProps> = ({
       display: "flex",
       justifyContent: "space-between",
       marginBottom: 16,
+      maxHeight: "20vh",
     }}
   >
     <Input
