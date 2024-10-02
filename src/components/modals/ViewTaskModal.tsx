@@ -53,7 +53,7 @@ export const ViewTaskModal: React.FC<ViewTaskModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={null}
-      bodyStyle={{ paddingTop: "16px" }}
+      styles={{ body: { paddingTop: "16px" } }}
     >
       {viewingTask && (
         <Descriptions column={1}>
